@@ -1,0 +1,19 @@
+# config/settings.yaml
+
+hdfs:
+  host: "localhost"
+  port: 9000
+  raw_data_path: "/data/social/raw"
+  processed_path: "/data/social/processed"
+  [cite_start]block_size: "128MB" # As per M1 spec [cite: 234, 268]
+  [cite_start]replication_factor: 3 # As per M1 spec [cite: 242, 284]
+
+hbase:
+  table_name: "social_media_trends"
+  column_families:
+    - [cite_start]"metrics" # (likes, retweets) [cite: 300]
+    - [cite_start]"meta"    # (sample text, region) [cite: 301]
+
+spark:
+  app_name: "SocialMediaTrendAnalytics"
+  log_level: "INFO"

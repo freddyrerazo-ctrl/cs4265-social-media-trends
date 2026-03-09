@@ -1,0 +1,5 @@
+pandas
+pyyaml
+# Added for future Spark/HDFS work
+pyspark
+python-dotenv
