@@ -1,31 +1,61 @@
-# Distributed Social Media Trend Analytics
-**CS 4265 Big Data Analytics - Milestone 2 Update**
+Distributed Social Media Trend Analytics
+CS 4265 Big Data Analytics - Milestone 3: Complete Implementation
 
-## 🎯 Project Progress (Milestone 2)
-As of March 8, 2026, the initial pipeline scaffolding and data acquisition phases are complete. 
+🎯 Project Progress (Milestone 3)
+As of April 5, 2026, the end-to-end Big Data pipeline is fully operational. Data now flows automatically from raw ingestion through Spark transformation into a persistent HBase NoSQL store.
 
-**Current Status:**
-- [x] Data acquired from Kaggle (Sentiment140/Reddit).
-- [x] Project directory structure established.
-- [x] Local ingestion script (Python/Pandas) verified for data persistence.
-- [ ] Spark Batch Processing (Planned for M3).
-- [ ] HBase Schema Integration (Planned for M3).
+Current Status:
 
-## 🛠️ Technology Stack
-- **Ingestion:** Python 3.x / Pandas (Local Prototyping)
-- **Storage:** HDFS-ready local file system (Mock HDFS structure)
-- **Processing:** Apache Spark (Ready for deployment)
-- **Data Store:** Parquet (Columnar storage for analytics)
+[x] Data Ingestion: Automated pipeline for 2,200+ social media records.
 
-## 📁 Repository Structure
-```text
-/social-media-trends-project
+[x] Spark Batch Processing: Full schema implementation (27 columns) with data cleaning and normalization.
+
+[x] HBase Persistence: Successful integration with HBase via Thrift Server for scalable NoSQL storage.
+
+[x] Automated Workflow: Verified end-to-end execution from main.py.
+
+🛠️ Technology Stack
+Processing: Apache Spark (PySpark)
+
+Storage Sink: Apache HBase (NoSQL)
+
+Interface: Thrift Server / HappyBase
+
+Environment: Java 11 / Python 3.x
+
+Data Format: CSV (Raw) -> Spark DataFrame -> HBase Tables
+
+📁 Repository Structure
+Plaintext
+/cs4265-social-media-trends
 │
 ├── /data                
-│   ├── /raw            <-- Contains Kaggle CSV (raw_social_media_data.csv)
-│   └── /processed      <-- Contains script-generated samples
+│   ├── /raw            <-- Input: raw_tweets.csv (27 columns)
+│   └── /processed      <-- Output: final_trends.csv (Spark-transformed)
 ├── /src
-│   └── ingest.py       <-- Script to load and persist data
-├── requirements.txt     <-- Project dependencies (pandas, pyspark)
-├── .gitignore           <-- Configured to exclude large datasets
+│   ├── /processing     <-- spark_init.py (Schema & Transformations)
+│   └── /storage        <-- hbase_handler.py (HBase/Thrift connection)
+├── /config             <-- Environment & Port configurations
+├── main.py             <-- Pipeline Entry Point (Run this)
+├── requirements.txt    <-- Dependencies: pyspark, happybase, pandas
 └── README.md
+🚀 Execution Instructions
+1. Prerequisites
+Ensure HBase is installed and running locally. Due to the distributed nature of the storage sink, the Thrift Server must be active to allow Python communication.
+
+2. Start Services
+Open a terminal and start the Thrift service:
+
+Bash
+hbase thrift start
+3. Run the Pipeline
+Execute the main script to trigger the full ingestion and transformation process:
+
+Bash
+python3 main.py
+4. Verify Persistence
+To confirm data has been successfully stored in the NoSQL sink, use the HBase shell:
+
+Bash
+hbase shell
+hbase> scan 'social_media_trends', {LIMIT => 5}
