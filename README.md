@@ -20,23 +20,7 @@ This project implements a fully automated Big Data pipeline designed to ingest, 
 * **Data Pipeline:** CSV (Raw) ➔ Spark DataFrame ➔ Refined CSV ➔ HBase Tables
 
 ---
-
-## 📁 Repository Structure
-```text
-/cs4265-social-media-trends
-│
-├── /data                
-│   ├── /raw            <-- Input: raw_tweets.csv (Initial 27-column dataset)
-│   └── /processed      <-- Output: final_trends.csv (Spark-cleaned & Transformed)
-├── /src
-│   ├── /processing     <-- spark_init.py (Schema definitions & Spark transformations)
-│   └── /storage        <-- hbase_handler.py (HBase connection & Thrift operations)
-├── /config             <-- Environment & Port configurations
-├── main.py             <-- Entry Point: Coordinates the full pipeline execution
-├── requirements.txt    <-- Dependencies: pyspark, happybase, pandas, thrift
-└── README.md
-
-🚀 Execution Instructions
+## 🚀 Execution Instructions
 1. Prerequisites
 HBase must be installed and running on the local loopback. Due to the Python-HBase interface, the Thrift Server must be active.
 
@@ -59,9 +43,25 @@ Bash
 hbase shell
 hbase> scan 'social_media_trends', {LIMIT => 5}
 
-🔧 Troubleshooting & Notes
+---
+## 🔧 Troubleshooting & Notes
 VPN Interference: If the Thrift server fails to connect (port 9090), ensure any active VPNs are disabled to allow local loopback traffic.
 
 Java Compatibility: This project is optimized for Java 11. Ensure JAVA_HOME is set correctly in your environment.
 
 Local Paths: The pipeline uses relative paths. Ensure you execute main.py from the project root directory.
+
+## 📁 Repository Structure
+```text
+/cs4265-social-media-trends
+│
+├── /data                
+│   ├── /raw            <-- Input: raw_tweets.csv (Initial 27-column dataset)
+│   └── /processed      <-- Output: final_trends.csv (Spark-cleaned & Transformed)
+├── /src
+│   ├── /processing     <-- spark_init.py (Schema definitions & Spark transformations)
+│   └── /storage        <-- hbase_handler.py (HBase connection & Thrift operations)
+├── /config             <-- Environment & Port configurations
+├── main.py             <-- Entry Point: Coordinates the full pipeline execution
+├── requirements.txt    <-- Dependencies: pyspark, happybase, pandas, thrift
+└── README.md
