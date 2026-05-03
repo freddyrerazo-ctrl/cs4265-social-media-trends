@@ -1,74 +1,169 @@
 # 📊 Distributed Social Media Trend Analytics
-**CS 4265 Big Data Analytics - Milestone 3: Complete Implementation**
+**CS 4265 Big Data Analytics — Milestone 4: Final Deliverable**
 
-## 🎯 Project Overview
-This project implements a fully automated Big Data pipeline designed to ingest, process, and persist social media trend data at scale. Using **Apache Spark** for distributed processing and **Apache HBase** as a NoSQL storage sink, the system transforms raw unstructured data into actionable insights stored in a high-performance database.
+> A production-grade Big Data pipeline that ingests, processes, and analyzes 2,200+ social media records using real distributed infrastructure.
 
-### **Current Status: Milestone 3 (April 5, 2026)**
-- [x] **Robust Data Ingestion:** Automated pipeline for 2,200+ social media records with a comprehensive 27-column schema.
-- [x] **Spark Batch Processing:** Implemented cleaning, normalization, and feature engineering (e.g., spam filtering and sentiment handling).
-- [x] **NoSQL Persistence:** Successful integration with HBase via the Thrift Server for scalable data storage.
-- [x] **End-to-End Automation:** Verified execution flow from raw CSV to HBase queryable state via `main.py`.
+---
+
+## 🏗️ Architecture
+raw_tweets.csv → HDFS (Hadoop 3.2.1) → Spark 3.5.0 → KMeans ML → HBase 2.1.2
+| Stage | Tool | Role |
+|-------|------|------|
+| Ingestion | HDFS + Python | Upload raw CSV to distributed storage |
+| Processing | Apache Spark | Schema enforcement, cleaning, feature engineering |
+| ML | Spark MLlib | KMeans clustering (k=5) |
+| Storage | Apache HBase | NoSQL persistence of 2,200 processed records |
 
 ---
 
 ## 🛠️ Technology Stack
-* **Engine:** Apache Spark (PySpark) 3.x
-* **Database:** Apache HBase (NoSQL)
-* **Interface:** Apache Thrift Server / HappyBase
-* **Environment:** Java 11 / Python 3.x / macOS (Darwin)
-* **Data Pipeline:** CSV (Raw) ➔ Spark DataFrame ➔ Refined CSV ➔ HBase Tables
+
+| Component | Technology | Version |
+|-----------|-----------|---------|
+| Distributed Storage | Apache Hadoop HDFS | 3.2.1 |
+| Processing Engine | Apache Spark (PySpark) | 3.5.0 |
+| ML Library | Spark MLlib KMeans | 3.5.0 |
+| NoSQL Database | Apache HBase | 2.1.2 |
+| Orchestration | Docker + Docker Compose | - |
+| HBase Client | happybase | latest |
+| Language | Python | 3.8+ |
 
 ---
-## 🚀 Execution Instructions
-To ensure a consistent environment (including Java, HBase, and the Thrift server), use the provided automation script. This pipeline is designed to run in a Linux-based environment (Ubuntu/Debian) or GitHub Codespaces.
 
-1. Environment Setup
-Run the following commands in the terminal to provision the infrastructure:
+## 📁 Project Structure
 
-# Give execution permission to the setup script
-chmod +x setup_env.sh
+```
+cs4265-social-media-trends/
+├── README.md
+├── LICENSE
+├── requirements.txt
+├── docker-compose.yml
+├── hadoop.env
+├── .env.example
+├── main.py
+├── config/
+│   └── settings.yaml
+├── data/
+│   ├── raw/
+│   ├── processed/
+│   └── sample/
+├── src/
+│   ├── ingestion/
+│   │   └── hdfs_upload.py
+│   ├── processing/
+│   │   └── spark_init.py
+│   └── storage/
+│       └── hbase_handler.py
+└── docs/
+    ├── architecture.md
+    ├── data_dictionary.md
+    └── validation.md
+```
+---
 
-# Execute the environment automation
+## 🚀 Setup Instructions
 
-(This installs Java, HBase 2.5.5, and starts the Thrift Daemon)
+### Prerequisites
+- Docker Desktop installed and running
+- Python 3.8+
+- Git
 
-./setup_env.sh
+### 1. Clone the Repository
+```bash
+git clone https://github.com/freddyrerazo-ctrl/cs4265-social-media-trends.git
+cd cs4265-social-media-trends
+```
 
-2. Running the Pipeline
-Once the setup script reports [SUCCESS], execute the main analytics engine:
+### 2. Set Up Environment Variables
+```bash
+cp .env.example .env
+```
 
-python3 main.py
+### 3. Install Python Dependencies
+```bash
+pip install -r requirements.txt
+```
 
-4. Verification
-Spark Logs: You will see Spark initialize and process data/raw/raw_tweets.csv.
+### 4. Start the Full Cluster
+```bash
+docker-compose up -d
+sleep 30
+docker ps
+```
 
-Output: The processed trends will be saved to data/processed/final_trends.csv.
+### 5. Upload Data to HDFS
+```bash
+python src/ingestion/hdfs_upload.py
+```
 
-Database: The transformation logic will persist validated records into the HBase social_media_trends table via the Thrift connection.
+### 6. Run the Full Pipeline
+```bash
+docker exec -u root spark pip install pyspark pyyaml python-dotenv numpy happybase
+docker exec -u root spark bash -c "cd /app && python3 -u main.py"
+```
 
-Important Note for Evaluation:
-While the pipeline is fully implemented, running it in certain cloud environments (like GitHub Codespaces) may trigger a getSubject is not supported Java error. This is a known compatibility issue between JDK 21+ and the Hadoop/Spark security manager. This is an environmental infrastructure constraint; the implementation logic for the data pipeline is fully functional and verified.
+### 7. Verify HBase Data
+```bash
+docker exec -it hbase hbase shell
+```
+Inside the shell:
+```
+list
+count 'social_trends'
+scan 'social_trends', {LIMIT => 3}
+exit
+```
 
 ---
-## 🔧 Troubleshooting & Notes
-VPN Interference: If the Thrift server fails to connect (port 9090), ensure any active VPNs are disabled to allow local loopback traffic.
 
-Java Compatibility: This project is optimized for Java 11. Ensure JAVA_HOME is set correctly in your environment.
+## ✅ Expected Output
 
-Local Paths: The pipeline uses relative paths. Ensure you execute main.py from the project root directory.
+```
+[INFO] Ingesting data from HDFS: hdfs://namenode:9000/data/social/raw/raw_tweets.csv
+[VALIDATION] Ingested 2200 records from HDFS.
+[SAMPLE] First 5 records:
++--------+--------+--------------+---------------+----------------+
+|platform|username|topic_category|sentiment_score|engagement_score|
++--------+--------+--------------+---------------+----------------+
+|YouTube |rxckafna|Technology    |0.82           |0.7             |
+|Reddit  |zjovqwps|Sports        |-0.02          |0.45            |
++--------+--------+--------------+---------------+----------------+
+[HBASE] Created table: social_trends
+[SUCCESS] Written 2200 records to HBase table: social_trends
+[SUCCESS] Pipeline complete for app: SocialMediaTrendAnalytics
+```
+---
 
-## 📁 Repository Structure
-```text
-/cs4265-social-media-trends
-│
-├── /data                
-│   ├── /raw            <-- Input: raw_tweets.csv (Initial 27-column dataset)
-│   └── /processed      <-- Output: final_trends.csv (Spark-cleaned & Transformed)
-├── /src
-│   ├── /processing     <-- spark_init.py (Schema definitions & Spark transformations)
-│   └── /storage        <-- hbase_handler.py (HBase connection & Thrift operations)
-├── /config             <-- Environment & Port configurations
-├── main.py             <-- Entry Point: Coordinates the full pipeline execution
-├── requirements.txt    <-- Dependencies: pyspark, happybase, pandas, thrift
-└── README.md
+## 📊 Validation Results
+
+| Metric | Value |
+|--------|-------|
+| Records ingested from HDFS | 2,200 |
+| Records dropped during cleaning | 0 |
+| KMeans clusters | 5 |
+| Records written to HBase | 2,200 |
+
+**Cluster Distribution:**
+
+| Cluster | Count |
+|---------|-------|
+| 0 | 509 |
+| 1 | 153 |
+| 2 | 411 |
+| 3 | 860 |
+| 4 | 267 |
+
+Full report: [docs/validation.md](docs/validation.md)
+
+---
+
+## ⚠️ Known Limitations
+
+- **Single datanode**: Development uses replication factor 1. Production would use 3+.
+- **Platform emulation**: Docker runs amd64 images under Rosetta on Apple Silicon — functionally correct.
+
+---
+
+## 👤 Author
+
+**Freddy Erazo** — CS 4265 Big Data Analytics, Spring 2026
