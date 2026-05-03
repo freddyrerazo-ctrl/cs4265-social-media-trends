@@ -1,0 +1,29 @@
+# Data files (too large for GitHub)
+data/raw/
+data/processed/
+data/hdfs_namenode/
+data/hdfs_datanode/
+data/hbase_data/
+
+# Credentials - never commit these
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Mac junk
+.DS_Store
+.AppleDouble
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDEs
+.vscode/
+.idea/
+
+# Sample data is OK to keep
+!data/sample/
