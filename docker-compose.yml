@@ -1,0 +1,50 @@
+services:
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    hostname: namenode
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    volumes:
+      - ./data/hdfs_namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=local
+    env_file:
+      - ./hadoop.env
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
+    hostname: datanode
+    depends_on:
+      - namenode
+    volumes:
+      - ./data/hdfs_datanode:/hadoop/dfs/data
+    env_file:
+      - ./hadoop.env
+
+  hbase:
+    image: dajobe/hbase
+    container_name: hbase
+    hostname: hbase
+    ports:
+      - "16000:16000"
+      - "16010:16010"
+      - "16020:16020"
+      - "9090:9090"
+    depends_on:
+      - namenode
+
+  spark:
+    image: apache/spark:3.5.0
+    container_name: spark
+    hostname: spark
+    depends_on:
+      - namenode
+      - datanode
+      - hbase
+    ports:
+      - "8080:8080"
+      - "4040:4040"
+    command: tail -f /dev/null

@@ -1,0 +1,17 @@
+hdfs:
+  host: namenode
+  port: 9000
+  raw_data_path: /data/social/raw
+  processed_path: /data/social/processed
+  block_size: 128MB
+  replication_factor: 1
+
+hbase:
+  table_name: social_media_trends
+  column_families:
+    - metrics
+    - meta
+
+spark:
+  app_name: SocialMediaTrendAnalytics
+  log_level: INFO
