@@ -1,5 +1,0 @@
-pandas
-pyspark
-pyyaml
-python-dotenv
-happybase
